@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLang}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${currentLang == 'zh'} ? '編輯講義' : 'Edit Lecture'">Edit Lecture</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar-admin}"></nav>
+
+    <div class="hero-banner">
+        <div class="container">
+            <h1 th:text="${currentLang == 'zh'} ? '編輯講義' : 'Edit Lecture'">Edit Lecture</h1>
+            <p th:text="${currentLang == 'zh'} ? '修改講義信息' : 'Modify lecture information'">Modify lecture information</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card-lms">
+                    <div class="card-body p-4">
+                        <form th:action="@{/admin/lecture/edit/{id}(id=${lecture.id})}" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <div class="mb-3">
+                                <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '標題 *' : 'Title *'">Title *</label>
+                                <input type="text" name="title" class="form-control form-control-lms" th:value="${lecture.title}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '簡介' : 'Summary'">Summary</label>
+                                <textarea name="summary" class="form-control form-control-lms" rows="3" th:text="${lecture.summary}"></textarea>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '上傳文件（可選）' : 'Upload File (optional)'">Upload File (optional)</label>
+                                <input type="file" name="file" class="form-control form-control-lms" accept=".pdf,.ppt,.pptx,.doc,.docx,.mp4">
+                                <div class="form-text" th:if="${lecture.fileName}" th:text="${currentLang == 'zh'} ? '當前文件：' : 'Current file: ' + ${lecture.fileName}">Current file: [[${lecture.fileName}]]</div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn-lms btn-lms-primary" th:text="${currentLang == 'zh'} ? '保存更改' : 'Save Changes'">Save Changes</button>
+                                <a th:href="@{/lecture/{id}(id=${lecture.id})}" class="btn-lms btn-lms-secondary" th:text="${currentLang == 'zh'} ? '取消' : 'Cancel'">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-lms">
+        <div class="container">
+            <p>COMP 3820SEF - Web Applications Course Management System</p>
+        </div>
+    </footer>
+</body>
+</html>

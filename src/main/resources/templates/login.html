@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLang}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${currentLang == 'zh'} ? '登入' : 'Login'">Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar-simple}"></nav>
+
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-75">
+            <div class="col-md-5 col-lg-4">
+                <div class="card-lms p-4">
+                    <div class="text-center mb-4">
+                        <h2 class="page-title" th:text="${currentLang == 'zh'} ? '登入' : 'Login'">Login</h2>
+                        <p class="text-muted-custom" th:text="${currentLang == 'zh'} ? '歡迎回來' : 'Welcome back'">Welcome back</p>
+                    </div>
+                    
+                    <div th:if="${param.error}" class="alert-lms alert-lms-danger mb-3" th:text="${currentLang == 'zh'} ? '用戶名或密碼錯誤' : 'Invalid username or password'"></div>
+                    <div th:if="${param.logout}" class="alert-lms alert-lms-success mb-3" th:text="${currentLang == 'zh'} ? '你已經登出' : 'You have been logged out'"></div>
+                    <div th:if="${param.registered}" class="alert-lms alert-lms-success mb-3" th:text="${currentLang == 'zh'} ? '註冊成功，請登入' : 'Registration successful, please login'"></div>
+                    
+                    <form th:action="@{/login}" method="post">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                        <div class="mb-3">
+                            <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '用戶名' : 'Username'">Username</label>
+                            <input type="text" name="username" class="form-control form-control-lms" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '密碼' : 'Password'">Password</label>
+                            <input type="password" name="password" class="form-control form-control-lms" required>
+                        </div>
+                        <button type="submit" class="btn-lms btn-lms-primary w-100" th:text="${currentLang == 'zh'} ? '登入' : 'Login'">Login</button>
+                    </form>
+                    
+                    <p class="text-center mt-4 mb-0">
+                        <span class="text-muted-custom" th:text="${currentLang == 'zh'} ? '還沒有帳戶？' : 'Don\'t have an account?'">Don't have an account?</span>
+                        <a href="#" th:href="@{/register}" class="text-accent" th:text="${currentLang == 'zh'} ? '註冊' : 'Register'">Register</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .min-vh-75 {
+            min-height: 75vh;
+        }
+    </style>
+</body>
+</html>

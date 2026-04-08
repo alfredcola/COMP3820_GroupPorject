@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<!-- Full navbar with user menu (for index and authenticated pages) -->
+<nav th:fragment="navbar-full" class="navbar navbar-expand-lg navbar-lms">
+    <div class="container">
+        <a class="navbar-brand" href="/">Fake OLE</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item" th:if="${currentLang != 'zh'}">
+                    <a class="nav-link" th:href="@{/(lang=zh)}">中文</a>
+                </li>
+                <li class="nav-item" th:if="${currentLang == 'zh'}">
+                    <a class="nav-link" th:href="@{/(lang=en)}">EN</a>
+                </li>
+
+                <th:block th:if="${isLoggedIn and not isTeacher}">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/profile}" th:text="#{nav.profile}">My Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/history/votes}" th:text="#{nav.vote.history}">Vote History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/history/comments}" th:text="#{nav.comment.history}">Comment History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/attendance}" th:text="#{nav.attendance}">Attendance</a>
+                    </li>
+                    <li class="nav-item">
+                        <form th:action="@{/logout}" method="post" class="d-inline">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <button type="submit" class="nav-link btn-logout" th:text="#{nav.logout}">Logout</button>
+                        </form>
+                    </li>
+                </th:block>
+
+                <th:block th:if="${isLoggedIn and isTeacher}">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/users}" th:text="#{nav.user.management}">User Management</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/lecture/create}" th:text="#{nav.add.lecture}">Add Lecture</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/lecture/import}" th:text="#{nav.import.lectures}">Import Lectures</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/poll/create}" th:text="#{nav.add.poll}">Add Poll</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/upload}" th:text="#{nav.batch.upload}">Batch Upload</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/attendance}" th:text="#{nav.attendance.manage}">Attendance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/profile}" th:text="#{nav.profile}">My Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <form th:action="@{/logout}" method="post" class="d-inline">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <button type="submit" class="nav-link btn-logout" th:text="#{nav.logout}">Logout</button>
+                        </form>
+                    </li>
+                </th:block>
+
+                <th:block th:unless="${isLoggedIn}">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/login}" th:text="#{nav.login}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/register}" th:text="#{nav.register}">Register</a>
+                    </li>
+                </th:block>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Simple navbar (for login/register pages) -->
+<nav th:fragment="navbar-simple" class="navbar navbar-expand-lg navbar-lms">
+    <div class="container">
+        <a class="navbar-brand" href="/">Fake OLE</a>
+        <div class="navbar-nav ms-auto align-items-center">
+            <a class="nav-link" th:if="${currentLang != 'zh'}" th:href="@{/(lang=zh)}">中文</a>
+            <a class="nav-link" th:if="${currentLang == 'zh'}" th:href="@{/(lang=en)}">EN</a>
+            <a class="nav-link" href="/" th:text="#{nav.home}">Home</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Simple navbar with logout (for profile and other auth pages) -->
+<nav th:fragment="navbar-loggedin" class="navbar navbar-expand-lg navbar-lms">
+    <div class="container">
+        <a class="navbar-brand" href="/">Fake OLE</a>
+        <div class="navbar-nav ms-auto align-items-center">
+            <a class="nav-link" th:if="${currentLang != 'zh'}" th:href="@{/(lang=zh)}">中文</a>
+            <a class="nav-link" th:if="${currentLang == 'zh'}" th:href="@{/(lang=en)}">EN</a>
+            <a class="nav-link" href="/" th:text="#{nav.home}">Home</a>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                <button type="submit" class="nav-link btn-logout" th:text="#{nav.logout}">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- Simple navbar with Back link (for attendance session pages) -->
+<nav th:fragment="navbar-back" class="navbar navbar-expand-lg navbar-lms">
+    <div class="container">
+        <a class="navbar-brand" href="/">Fake OLE</a>
+        <div class="navbar-nav ms-auto align-items-center">
+            <a class="nav-link" th:if="${currentLang != 'zh'}" th:href="@{/(lang=zh)}">中文</a>
+            <a class="nav-link" th:if="${currentLang == 'zh'}" th:href="@{/(lang=en)}">EN</a>
+            <a class="nav-link" th:href="@{/admin/attendance}" th:text="#{common.back}">Back</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Student navbar (for student pages with history links) -->
+<nav th:fragment="navbar-student" class="navbar navbar-expand-lg navbar-lms">
+    <div class="container">
+        <a class="navbar-brand" href="/">Fake OLE</a>
+        <div class="navbar-nav ms-auto align-items-center">
+            <a class="nav-link" th:if="${currentLang != 'zh'}" th:href="@{/(lang=zh)}">中文</a>
+            <a class="nav-link" th:if="${currentLang == 'zh'}" th:href="@{/(lang=en)}">EN</a>
+            <a class="nav-link" href="/" th:text="#{nav.home}">Home</a>
+            <a class="nav-link" th:href="@{/history/comments}" th:text="#{nav.comment.history}">Comment History</a>
+            <a class="nav-link" th:href="@{/attendance}" th:text="#{nav.attendance}">Attendance</a>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                <button type="submit" class="nav-link btn-logout" th:text="#{nav.logout}">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- Video navbar with Back to Lecture link -->
+<nav th:fragment="navbar-video" class="navbar navbar-expand-lg navbar-lms">
+    <div class="container">
+        <a class="navbar-brand" href="/">Fake OLE</a>
+        <div class="navbar-nav ms-auto align-items-center">
+            <a class="nav-link" th:if="${currentLang != 'zh'}" th:href="@{/(lang=zh)}">中文</a>
+            <a class="nav-link" th:if="${currentLang == 'zh'}" th:href="@{/(lang=en)}">EN</a>
+            <a class="nav-link" href="/" th:text="#{nav.home}">Home</a>
+            <a class="nav-link" th:href="@{/lecture/{id}(id=${lecture.id})}" th:text="#{video.back.lecture}">Back to Lecture</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Admin navbar (for admin pages with teacher menu) -->
+<nav th:fragment="navbar-admin" class="navbar navbar-expand-lg navbar-lms">
+    <div class="container">
+        <a class="navbar-brand" href="/">Fake OLE</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAdmin">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAdmin">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item" th:if="${currentLang != 'zh'}">
+                    <a class="nav-link" th:href="@{/(lang=zh)}">中文</a>
+                </li>
+                <li class="nav-item" th:if="${currentLang == 'zh'}">
+                    <a class="nav-link" th:href="@{/(lang=en)}">EN</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/users}" th:text="#{nav.user.management}">User Management</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/lecture/create}" th:text="#{nav.add.lecture}">Add Lecture</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/lecture/import}" th:text="#{nav.import.lectures}">Import Lectures</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/poll/create}" th:text="#{nav.add.poll}">Add Poll</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/upload}" th:text="#{nav.batch.upload}">Batch Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/attendance}" th:text="#{nav.attendance.manage}">Attendance</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/profile}" th:text="#{nav.profile}">My Profile</a>
+                </li>
+                <li class="nav-item">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                        <button type="submit" class="nav-link btn-logout" th:text="#{nav.logout}">Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+</body>
+</html>

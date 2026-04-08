@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLang}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${currentLang == 'zh'} ? '考勤會話' : 'Attendance Session'">Attendance Session</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+</head>
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar-admin}"></nav>
+
+    <div class="hero-banner">
+        <div class="container">
+            <h1 th:text="${session != null} ? ${session.sessionName} : 'Session Not Found'">Session Name</h1>
+            <p th:text="${currentLang == 'zh'} ? '考勤會話詳情' : 'Attendance session details'">Attendance session details</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card-lms mb-4" th:if="${session != null}">
+            <div class="card-header d-flex align-items-center">
+                <span class="me-2">📋</span>
+                <span th:text="${currentLang == 'zh'} ? '會話詳情' : 'Session Details'">Session Details</span>
+                <span th:if="${session.active}" class="tag tag-green ms-auto" th:text="${currentLang == 'zh'} ? '進行中' : 'Active'">Active</span>
+                <span th:unless="${session.active}" class="tag tag-blue ms-auto" th:text="${currentLang == 'zh'} ? '已結束' : 'Ended'">Ended</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="tag tag-blue me-2" th:text="${currentLang == 'zh'} ? '考勤碼' : 'Code'">Code</span>
+                            <strong th:text="${session.sessionCode}">CODE</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="tag tag-purple me-2" th:text="${currentLang == 'zh'} ? '總人數' : 'Total'">Total</span>
+                            <strong th:text="${totalAttendees}">0</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <span class="text-muted-custom d-block mb-1" th:text="${currentLang == 'zh'} ? '開始時間' : 'Start Time'">Start Time</span>
+                        <span th:text="${session.startTime != null} ? ${#temporals.format(session.startTime, 'yyyy-MM-dd HH:mm')} : '-'">-</span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <span class="text-muted-custom d-block mb-1" th:text="${currentLang == 'zh'} ? '結束時間' : 'End Time'">End Time</span>
+                        <span th:text="${session.endTime != null} ? ${#temporals.format(session.endTime, 'yyyy-MM-dd HH:mm')} : '-'">-</span>
+                    </div>
+                </div>
+
+                <div th:if="${session.active}" class="mt-3">
+                    <form th:action="@{/admin/attendance/stop/{id}(id=${session.id})}" method="post">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn-lms btn-lms-danger" th:text="${currentLang == 'zh'} ? '結束會話' : 'End Session'">End Session</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-lms mb-4" th:if="${session != null}">
+            <div class="card-header d-flex align-items-center">
+                <span class="me-2">👥</span>
+                <span th:text="${currentLang == 'zh'} ? '簽到學生列表' : 'Attendees List'">Attendees List</span>
+                <span class="tag tag-blue ms-auto" th:text="${attendances != null} ? ${attendances.size()} : 0">0</span>
+            </div>
+            <div class="card-body p-0">
+                <th:block th:if="${attendances != null and not #lists.isEmpty(attendances)}">
+                    <div class="table-responsive">
+                        <table class="table-lms mb-0">
+                            <thead>
+                                <tr>
+                                    <th th:text="${currentLang == 'zh'} ? '學生姓名' : 'Student Name'">Student Name</th>
+                                    <th th:text="${currentLang == 'zh'} ? '用戶名' : 'Username'">Username</th>
+                                    <th th:text="${currentLang == 'zh'} ? '簽到時間' : 'Check-in Time'">Check-in Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="att : ${attendances}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="comment-avatar me-2" th:text="${att.user != null} ? ${#strings.substring(att.user.fullName, 0, 1)} : '?'">U</div>
+                                            <span th:text="${att.user != null} ? ${att.user.fullName} : '-'">Name</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${att.user != null} ? ${att.user.username} : '-'">username</td>
+                                    <td th:text="${att.attendedAt != null} ? ${#temporals.format(att.attendedAt, 'yyyy-MM-dd HH:mm:ss')} : '-'">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </th:block>
+                <th:block th:unless="${attendances != null and not #lists.isEmpty(attendances)}">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <div class="empty-state-text" th:text="${currentLang == 'zh'} ? '暫無簽到記錄' : 'No attendees yet.'">No attendees yet.</div>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+        
+        <div class="card-lms" th:unless="${session != null}">
+            <div class="card-body text-center">
+                <div class="empty-state">
+                    <div class="empty-state-icon">❌</div>
+                    <div class="empty-state-text" th:text="${currentLang == 'zh'} ? '找不到此考勤會話' : 'Session not found'">Session not found</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a th:href="@{/admin/attendance/all}" class="btn-lms btn-lms-secondary" th:text="${currentLang == 'zh'} ? '返回' : 'Back'">Back</a>
+        </div>
+    </div>
+
+    <footer class="footer-lms">
+        <div class="container">
+            <p>COMP 3820SEF - Web Applications Course Management System</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

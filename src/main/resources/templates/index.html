@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLang}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP 3820SEF - Web Applications</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+</head>
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar-full}"></nav>
+
+    <div class="hero-banner">
+        <div class="container">
+            <h1 th:text="#{home.title}">Web Applications: Design and Development</h1>
+            <p th:text="#{home.subtitle}">COMP 3820SEF - Online Course Website</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content-grid">
+            <div class="card-lms">
+                <div class="card-header d-flex align-items-center">
+                    <span class="me-2">📚</span>
+                    <span th:text="#{home.lectures}">Lectures</span>
+                    <span class="tag tag-blue ms-auto" th:text="${lectures.size()}">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <th:block th:if="${not #lists.isEmpty(lectures)}">
+                        <th:block th:each="lecture, iterStat : ${lectures}">
+                            <a th:href="@{/lecture/{id}(id=${lecture.id})}" class="list-item-lms">
+                                <div class="item-icon" style="background: var(--accent-blue-bg); color: var(--accent-blue-text);">
+                                    📄
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-title" th:text="${lecture.title}">Lecture Title</div>
+                                    <div class="item-subtitle" th:text="${#strings.abbreviate(lecture.summary, 50)}">Summary...</div>
+                                </div>
+                                <span class="item-arrow">→</span>
+                            </a>
+                        </th:block>
+                    </th:block>
+                    <th:block th:if="${#lists.isEmpty(lectures)}">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📚</div>
+                            <div class="empty-state-text" th:text="#{home.no.lectures}">No lectures available yet.</div>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+
+            <div class="card-lms">
+                <div class="card-header d-flex align-items-center">
+                    <span class="me-2">📊</span>
+                    <span th:text="#{home.polls}">Polls</span>
+                    <span class="tag tag-orange ms-auto" th:text="${polls.size()}">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <th:block th:if="${not #lists.isEmpty(polls)}">
+                        <th:block th:each="poll : ${polls}">
+                            <a th:href="@{/poll/{id}(id=${poll.id})}" class="list-item-lms">
+                                <div class="item-icon" style="background: var(--accent-orange-bg); color: var(--accent-orange-text);">
+                                    📊
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-title" th:text="${poll.question}">Poll Question</div>
+                                    <div class="item-subtitle" th:text="${poll.options.size()} + ' ' + #{poll.options}">0 options</div>
+                                </div>
+                                <span class="item-arrow">→</span>
+                            </a>
+                        </th:block>
+                    </th:block>
+                    <th:block th:if="${#lists.isEmpty(polls)}">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📊</div>
+                            <div class="empty-state-text" th:text="#{home.no.polls}">No polls available yet.</div>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+
+            <div class="card-lms">
+                <div class="card-header d-flex align-items-center">
+                    <span class="me-2">🔔</span>
+                    <span th:text="#{home.news}">Latest News</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📰</div>
+                        <div class="empty-state-text" th:text="#{home.no.news}">No latest news available.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-lms mb-4">
+            <div class="card-header d-flex align-items-center">
+                <span class="me-2">📅</span>
+                <span th:text="#{home.upcoming}">Upcoming Classes</span>
+            </div>
+            <div class="card-body">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📅</div>
+                    <div class="empty-state-text" th:text="#{home.no.upcoming}">No classes for the next two days.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-lms">
+        <div class="container">
+            <p>COMP 3820SEF - Web Applications Course Management System</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

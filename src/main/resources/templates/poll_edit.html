@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLang}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${currentLang == 'zh'} ? '編輯投票' : 'Edit Poll'">Edit Poll</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar-admin}"></nav>
+
+    <div class="hero-banner">
+        <div class="container">
+            <h1 th:text="${currentLang == 'zh'} ? '編輯投票' : 'Edit Poll'">Edit Poll</h1>
+            <p th:text="${currentLang == 'zh'} ? '修改投票問題和選項' : 'Modify poll question and options'">Modify poll question and options</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card-lms">
+                    <div class="card-body p-4">
+                        <form th:action="@{/admin/poll/edit/{id}(id=${poll.id})}" method="post">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <div class="mb-3">
+                                <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '問題 *' : 'Question *'">Question *</label>
+                                <input type="text" name="question" class="form-control form-control-lms" th:value="${poll.question}" required>
+                            </div>
+                            
+                            <h5 class="mt-4 mb-3" th:text="${currentLang == 'zh'} ? '選項' : 'Options'">Options</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '選項 1 *' : 'Option 1 *'">Option 1 *</label>
+                                    <input type="text" name="option1" class="form-control form-control-lms" th:value="${poll.options.size() > 0} ? ${poll.options[0].text} : ''" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '選項 2 *' : 'Option 2 *'">Option 2 *</label>
+                                    <input type="text" name="option2" class="form-control form-control-lms" th:value="${poll.options.size() > 1} ? ${poll.options[1].text} : ''" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '選項 3 *' : 'Option 3 *'">Option 3 *</label>
+                                    <input type="text" name="option3" class="form-control form-control-lms" th:value="${poll.options.size() > 2} ? ${poll.options[2].text} : ''" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '選項 4 *' : 'Option 4 *'">Option 4 *</label>
+                                    <input type="text" name="option4" class="form-control form-control-lms" th:value="${poll.options.size() > 3} ? ${poll.options[3].text} : ''" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '選項 5 *' : 'Option 5 *'">Option 5 *</label>
+                                    <input type="text" name="option5" class="form-control form-control-lms" th:value="${poll.options.size() > 4} ? ${poll.options[4].text} : ''" required>
+                                </div>
+                            </div>
+                            
+                            <div class="alert-lms alert-lms-danger mt-3" th:text="${currentLang == 'zh'} ? '注意：編輯投票將會重置所有現有的投票' : 'Note: Editing the poll will reset all existing votes'">Note: Editing the poll will reset all existing votes</div>
+                            
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit" class="btn-lms btn-lms-primary" th:text="${currentLang == 'zh'} ? '保存更改' : 'Save Changes'">Save Changes</button>
+                                <a th:href="@{/poll/{id}(id=${poll.id})}" class="btn-lms btn-lms-secondary" th:text="${currentLang == 'zh'} ? '取消' : 'Cancel'">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-lms">
+        <div class="container">
+            <p>COMP 3820SEF - Web Applications Course Management System</p>
+        </div>
+    </footer>
+</body>
+</html>

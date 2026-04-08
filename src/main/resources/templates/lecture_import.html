@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLang}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${currentLang == 'zh'} ? '導入講義' : 'Import Lectures'">Import Lectures</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar-admin}"></nav>
+
+    <div class="hero-banner">
+        <div class="container">
+            <h1 th:text="${currentLang == 'zh'} ? '導入講義' : 'Import Lectures'">Import Lectures</h1>
+            <p th:text="${currentLang == 'zh'} ? '從 LectureNote 資料夾導入教材' : 'Import course materials from LectureNote folder'">Import course materials from LectureNote folder</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card-lms">
+                    <div class="card-header d-flex align-items-center">
+                        <span class="me-2">📁</span>
+                        <span th:text="${currentLang == 'zh'} ? '選擇要導入的檔案' : 'Select Files to Import'">Select Files to Import</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted-custom mb-3">
+                            <small th:text="${currentLang == 'zh'} ? '來源資料夾：' : 'Source folder: '">Source folder: </small>
+                            <code th:text="${lectureNoteDir}">/path/to/LectureNote</code>
+                        </p>
+                        
+                        <form th:action="@{/admin/lecture/import}" method="post">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <div class="mb-3">
+                                <div class="form-check" th:each="file : ${availableFiles}">
+                                    <input class="form-check-input" type="checkbox" 
+                                           name="selectedFiles" 
+                                           th:value="${file.name}" 
+                                           th:id="${'file-' + file.name}">
+                                    <label class="form-check-label" th:for="${'file-' + file.name}">
+                                        <span th:text="${file.name}">filename.pdf</span>
+                                        <small class="text-muted-custom ms-2">
+                                            (<span th:text="${#numbers.formatInteger(file.length(), 1)}">0</span> bytes)
+                                        </small>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div th:if="${#lists.isEmpty(availableFiles)}" class="alert-lms alert-lms-info">
+                                <span th:text="${currentLang == 'zh'} ? 'LectureNote 資料夾中沒有找到任何檔案' : 'No files found in LectureNote folder'">No files found in LectureNote folder</span>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn-lms btn-lms-primary" th:text="${currentLang == 'zh'} ? '導入所選檔案' : 'Import Selected Files'">Import Selected Files</button>
+                                <a th:href="@{/admin/lecture/create}" class="btn-lms btn-lms-secondary" th:text="${currentLang == 'zh'} ? '返回' : 'Back'">Back</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card-lms">
+                    <div class="card-header" th:text="${currentLang == 'zh'} ? '說明' : 'Instructions'">Instructions</div>
+                    <div class="card-body">
+                        <ol class="mb-0">
+                            <li th:text="${currentLang == 'zh'} ? '將 PDF、PPT、DOC 等檔案放入 LectureNote 資料夾' : 'Place your PDF, PPT, DOC files in the LectureNote folder'">Place your PDF, PPT, DOC files in the LectureNote folder</li>
+                            <li th:text="${currentLang == 'zh'} ? '選擇要導入的檔案' : 'Select the files you want to import'">Select the files you want to import</li>
+                            <li th:text="${currentLang == 'zh'} ? '點擊導入按鈕' : 'Click the import button'">Click the import button</li>
+                            <li th:text="${currentLang == 'zh'} ? '導入後可在首頁查看講義' : 'After import, view lectures on the homepage'">After import, view lectures on the homepage</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-lms">
+        <div class="container">
+            <p>COMP 3820SEF - Web Applications Course Management System</p>
+        </div>
+    </footer>
+</body>
+</html>

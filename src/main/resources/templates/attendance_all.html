@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLang}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${currentLang == 'zh'} ? '所有考勤會話' : 'All Attendance Sessions'">All Attendance Sessions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+</head>
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar-admin}"></nav>
+
+    <div class="hero-banner">
+        <div class="container">
+            <h1 th:text="${currentLang == 'zh'} ? '所有考勤會話' : 'All Attendance Sessions'">All Attendance Sessions</h1>
+            <p th:text="${currentLang == 'zh'} ? '查看所有考勤記錄' : 'View all attendance records'">View all attendance records</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card-lms">
+            <div class="card-body p-0">
+                <th:block th:if="${sessionsByCode != null and not #maps.isEmpty(sessionsByCode)}">
+                    <div class="table-responsive">
+                        <table class="table-lms mb-0">
+                            <thead>
+                                <tr>
+                                    <th th:text="${currentLang == 'zh'} ? '會話名稱' : 'Session Name'">Session Name</th>
+                                    <th th:text="${currentLang == 'zh'} ? '考勤碼' : 'Code'">Code</th>
+                                    <th th:text="${currentLang == 'zh'} ? '狀態' : 'Status'">Status</th>
+                                    <th th:text="${currentLang == 'zh'} ? '人數' : 'Count'">Count</th>
+                                    <th th:text="${currentLang == 'zh'} ? '操作' : 'Action'">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <th:block th:each="sessionEntry : ${sessionsByCode}">
+                                    <tr>
+                                        <td th:text="${sessionNames != null and sessionNames[sessionEntry.key] != null} ? ${sessionNames[sessionEntry.key]} : '-'">Session Name</td>
+                                        <td><span class="tag tag-blue" th:text="${sessionEntry.key}">CODE</span></td>
+                                        <td>
+                                            <span th:if="${sessionActiveStatus != null and sessionActiveStatus[sessionEntry.key]}" class="tag tag-green" th:text="${currentLang == 'zh'} ? '進行中' : 'Active'">Active</span>
+                                            <span th:unless="${sessionActiveStatus != null and sessionActiveStatus[sessionEntry.key]}" class="tag tag-blue" th:text="${currentLang == 'zh'} ? '已結束' : 'Ended'">Ended</span>
+                                        </td>
+                                        <td th:text="${sessionEntry.value.size()}">0</td>
+                                        <td>
+                                            <a th:href="@{/admin/attendance/session/{code}(code=${sessionEntry.key})}" class="btn-lms btn-lms-secondary btn-sm" th:text="${currentLang == 'zh'} ? '查看' : 'View'">View</a>
+                                        </td>
+                                    </tr>
+                                </th:block>
+                            </tbody>
+                        </table>
+                    </div>
+                </th:block>
+                <th:block th:unless="${sessionsByCode != null and not #maps.isEmpty(sessionsByCode)}">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <div class="empty-state-text" th:text="${currentLang == 'zh'} ? '暫無考勤記錄' : 'No attendance sessions yet.'">No attendance sessions yet.</div>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a th:href="@{/admin/attendance}" class="btn-lms btn-lms-secondary" th:text="${currentLang == 'zh'} ? '返回' : 'Back'">Back</a>
+        </div>
+    </div>
+
+    <footer class="footer-lms">
+        <div class="container">
+            <p>COMP 3820SEF - Web Applications Course Management System</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

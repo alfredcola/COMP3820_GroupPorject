@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLang}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${poll.question}">Poll</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar-simple}"></nav>
+
+    <div class="hero-banner">
+        <div class="container">
+            <h1 th:text="${poll.question}">Poll Question</h1>
+            <p th:text="#{poll.cast.vote}">Cast your vote</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card-lms mb-4">
+                    <div class="card-header d-flex align-items-center">
+                        <span class="me-2">📊</span>
+                        <span th:text="#{poll.vote.options}">Vote Options</span>
+                        <th:block th:if="${userVote != null}">
+                            <span class="tag tag-green ms-auto" th:text="#{poll.voted}">Voted</span>
+                        </th:block>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${param.error}" class="alert-lms alert-lms-danger mb-3" role="alert">
+                            <span th:if="${param.error[0] == 'cannotDelete'}" th:text="#{poll.cannot.delete}">Cannot delete poll: users have already voted</span>
+                            <span th:if="${param.error[0] == 'cannotEdit'}" th:text="#{poll.cannot.edit}">Cannot edit poll: users have already voted</span>
+                        </div>
+                        
+                        <form th:action="@{/poll/{id}/vote(id=${poll.id})}" method="post" id="voteForm">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <th:block th:each="option : ${poll.options}">
+                                <div class="vote-option-lms" 
+                                     th:id="${'option-' + option.id}"
+                                     th:classappend="${userVote != null and userVote.option.id == option.id} ? 'selected' : ''"
+                                     th:onclick="${isLoggedIn} ? 'selectOption(' + ${option.id} + ')' : ''">
+                                    <div class="vote-radio"></div>
+                                    <span class="vote-text" th:text="${option.text}">Option</span>
+                                    <span class="vote-count" th:text="${option.voteCount} + ' ' + #{poll.votes}">0 votes</span>
+                                    <input type="radio" th:name="optionId" th:value="${option.id}" 
+                                           th:checked="${userVote != null and userVote.option.id == option.id}"
+                                           th:disabled="${!isLoggedIn}"
+                                           style="display: none;">
+                                </div>
+                            </th:block>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn-lms btn-lms-primary" id="voteBtn" 
+                                        th:disabled="${!isLoggedIn}">
+                                    <span th:if="${isLoggedIn}" th:text="#{poll.submit.vote}">Submit Vote</span>
+                                    <span th:unless="${isLoggedIn}" th:text="#{poll.login.to.vote}">Login to Vote</span>
+                                </button>
+                            </div>
+
+                            <div th:if="${userVote != null}" class="alert-lms alert-lms-info mt-3">
+                                <span th:text="#{poll.change.vote}">You have already voted. You can change your vote by selecting another option.</span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card-lms">
+                    <div class="card-header d-flex align-items-center">
+                        <span class="me-2">💬</span>
+                        <span th:text="#{poll.comments}">Comments</span>
+                        <span class="tag tag-blue ms-auto" th:text="${comments.size()}">0</span>
+                    </div>
+                    <div class="card-body">
+                        <th:block th:if="${not #lists.isEmpty(comments)}">
+                            <th:block th:each="comment : ${comments}">
+                                <div class="comment-item">
+                                    <div class="d-flex">
+                                        <div class="comment-avatar" th:text="${#strings.substring(comment.user.fullName, 0, 1)}">U</div>
+                                        <div class="comment-content">
+                                            <div class="comment-header">
+                                                <span class="comment-author" th:text="${comment.user.fullName}">User</span>
+                                                <span class="comment-time" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">Date</span>
+                                            </div>
+                                            <div class="comment-text" th:text="${comment.content}">Comment content</div>
+                                        </div>
+                                        <div th:if="${isTeacher}" class="ms-2">
+                                            <form th:action="@{/comment/delete/{id}(id=${comment.id})}" method="post">
+                                                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                                                <button type="submit" class="btn-lms btn-lms-danger btn-sm" onclick="return confirm('Delete this comment?')">🗑️</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th:block>
+                        </th:block>
+                        <th:block th:if="${#lists.isEmpty(comments)}">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">💬</div>
+                                <div class="empty-state-text" th:text="#{poll.no.comments}">No comments yet.</div>
+                            </div>
+                        </th:block>
+
+                        <div th:if="${isLoggedIn}" class="mt-4">
+                            <h5 class="mb-3" th:text="#{poll.add.comment}">Add Comment</h5>
+                            <form th:action="@{/comment/poll/{id}(id=${poll.id})}" method="post">
+                                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                                <div class="mb-3">
+                                    <textarea name="content" class="form-control form-control-lms" rows="3" required th:placeholder="#{lecture.enter.comment}"></textarea>
+                                </div>
+                                <button type="submit" class="btn-lms btn-lms-primary" th:text="#{poll.submit.comment}">Submit Comment</button>
+                            </form>
+                        </div>
+                        <div th:unless="${isLoggedIn}" class="mt-4">
+                            <div class="alert-lms alert-lms-info">
+                                <a href="/login" th:text="#{nav.login}">Login</a>
+                                <span th:text="#{lecture.login.to.comment}">to add comments.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card-lms mb-4" th:if="${isTeacher}">
+                    <div class="card-header" th:text="#{lecture.management}">Management</div>
+                    <div class="card-body">
+                        <th:block th:if="${totalPollVotes == 0}">
+                            <div class="d-flex gap-2">
+                                <a th:href="@{/admin/poll/edit/{id}(id=${poll.id})}" class="btn-lms btn-lms-warning flex-fill">
+                                    ✏️ <span th:text="#{poll.edit}">Edit</span>
+                                </a>
+                                <form th:action="@{/admin/poll/delete/{id}(id=${poll.id})}" method="post" class="d-inline flex-fill">
+                                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="btn-lms btn-lms-danger w-100" onclick="return confirm('Delete this poll?')">
+                                        🗑️ <span th:text="#{poll.delete}">Delete</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </th:block>
+                        <th:block th:if="${totalPollVotes > 0}">
+                            <div class="alert-lms alert-lms-info" th:text="#{poll.has.votes}">Poll has votes, cannot edit or delete</div>
+                        </th:block>
+                    </div>
+                </div>
+
+                <div class="card-lms">
+                    <div class="card-header" th:text="#{poll.poll.info}">Poll Information</div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <span class="tag tag-orange">Poll</span>
+                        </div>
+                        <p class="text-muted-custom small" th:text="${poll.options.size()} + ' ' + #{poll.options}">0 options</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-lms">
+        <div class="container">
+            <p>COMP 3820SEF - Web Applications Course Management System</p>
+        </div>
+    </footer>
+
+    <script th:inline="javascript">
+        function selectOption(optionId) {
+            document.querySelectorAll('.vote-option-lms').forEach(function(el) {
+                el.classList.remove('selected');
+            });
+            
+            var selectedOption = document.getElementById('option-' + optionId);
+            if (selectedOption) {
+                selectedOption.classList.add('selected');
+            }
+            
+            var radios = document.querySelectorAll('input[name="optionId"]');
+            radios.forEach(function(radio) {
+                radio.checked = (radio.value === String(optionId));
+            });
+        }
+        
+        var userVote = /*[[${userVote}]]*/ null;
+        if (userVote != null) {
+            var voteBtn = document.getElementById('voteBtn');
+            if (voteBtn) {
+                voteBtn.disabled = false;
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

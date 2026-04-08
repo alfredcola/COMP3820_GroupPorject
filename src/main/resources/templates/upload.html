@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${currentLang}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${currentLang == 'zh'} ? '批量上傳' : 'Batch Upload'">Batch Upload</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar :: navbar-admin}"></nav>
+
+    <div class="hero-banner">
+        <div class="container">
+            <h1 th:text="${currentLang == 'zh'} ? '批量上傳教材' : 'Batch Upload Course Materials'">Batch Upload Course Materials</h1>
+            <p th:text="${currentLang == 'zh'} ? '一次上傳多個教材文件' : 'Upload multiple course material files at once'">Upload multiple course material files at once</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card-lms">
+                    <div class="card-header d-flex align-items-center">
+                        <span class="me-2">📤</span>
+                        <span th:text="${currentLang == 'zh'} ? '選擇文件' : 'Select Files'">Select Files</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <form th:action="@{/admin/upload/batch}" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <div class="mb-4">
+                                <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '標題（前綴）' : 'Title (Prefix)'">Title (Prefix)</label>
+                                <input type="text" name="title" class="form-control form-control-lms" required 
+                                       th:placeholder="${currentLang == 'zh'} ? '輸入教材標題...' : 'Enter course title...'">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '簡介' : 'Summary'">Summary</label>
+                                <textarea name="summary" class="form-control form-control-lms" rows="3"
+                                          th:placeholder="${currentLang == 'zh'} ? '輸入教材簡介...' : 'Enter course summary...'"></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label-lms" th:text="${currentLang == 'zh'} ? '選擇檔案（可選多個）' : 'Select Files (Multiple)'">Select Files (Multiple)</label>
+                                <input type="file" name="files" class="form-control form-control-lms" multiple required>
+                                <div class="form-text" th:text="${currentLang == 'zh'} ? '支援 PDF, MP4, WebM, OGG 等格式' : 'Supports PDF, MP4, WebM, OGG formats'">Supports PDF, MP4, WebM, OGG formats</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn-lms btn-lms-primary">
+                                    📤 <span th:text="${currentLang == 'zh'} ? '上傳' : 'Upload'">Upload</span>
+                                </button>
+                                <a th:href="@{/}" class="btn-lms btn-lms-secondary">
+                                    ← <span th:text="${currentLang == 'zh'} ? '返回主頁' : 'Back to Home'">Back to Home</span>
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-lms">
+        <div class="container">
+            <p>COMP 3820SEF - Web Applications Course Management System</p>
+        </div>
+    </footer>
+</body>
+</html>
