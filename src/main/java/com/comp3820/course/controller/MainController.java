@@ -2,6 +2,7 @@ package com.comp3820.course.controller;
 
 import com.comp3820.course.model.*;
 import com.comp3820.course.repository.*;
+import com.comp3820.course.service.QRCodeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -33,11 +34,13 @@ public class MainController {
     private final CommentRepository commentRepo;
     private final AttendanceRepository attendanceRepo;
     private final PasswordEncoder passwordEncoder;
+    private final QRCodeService qrCodeService;
     
     public MainController(UserRepository userRepo, LectureRepository lectureRepo,
                         PollRepository pollRepo, PollOptionRepository pollOptionRepo,
                         VoteRepository voteRepo, CommentRepository commentRepo,
-                        AttendanceRepository attendanceRepo, PasswordEncoder passwordEncoder) {
+                        AttendanceRepository attendanceRepo, PasswordEncoder passwordEncoder,
+                        QRCodeService qrCodeService) {
         this.userRepo = userRepo;
         this.lectureRepo = lectureRepo;
         this.pollRepo = pollRepo;
@@ -46,6 +49,7 @@ public class MainController {
         this.commentRepo = commentRepo;
         this.attendanceRepo = attendanceRepo;
         this.passwordEncoder = passwordEncoder;
+        this.qrCodeService = qrCodeService;
     }
     
     // ==================== INDEX & NAVIGATION ====================
@@ -778,7 +782,7 @@ public class MainController {
         model.addAttribute("currentLang", lang != null ? lang : "en");
     }
     
-    // ==================== ATTENDANCE SYSTEM ====================
+    // ==================== ATTENDANCE SYSTEM WITH QR CODE ====================
     
     @GetMapping("/admin/attendance")
     public String attendancePage(Model model, Authentication auth, HttpServletRequest request) {
@@ -908,6 +912,96 @@ public class MainController {
         
         return "attendance_all";
     }
+    
+    // ==================== QR CODE GENERATION ENDPOINTS ====================
+    
+    /**
+     * Generate QR Code for attendance session
+     * The QR code contains the attendance join URL with the session code
+     */
+    @GetMapping("/admin/attendance/qr/{code}")
+    public void getAttendanceQRCode(@PathVariable String code, 
+                                    HttpServletResponse response,
+                                    Authentication auth) {
+        // Verify teacher authorization
+        if (auth == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+        
+        User user = userRepo.findByUsername(auth.getName()).orElse(null);
+        if (user == null || user.getRole() != User.Role.TEACHER) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+        
+        try {
+            // Verify session exists
+            Attendance session = attendanceRepo.findBySessionCodeAndUserIsNull(code).orElse(null);
+            if (session == null) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+            
+            // Generate attendance URL (change localhost:8080 to your actual domain in production)
+            String attendanceUrl = "http://localhost:8080/attendance/mark?code=" + code;
+            
+            // Generate QR code
+            byte[] qrCode = qrCodeService.generateQRCodeImage(attendanceUrl);
+            
+            // Send response
+            response.setContentType("image/png");
+            response.setContentLength(qrCode.length);
+            response.getOutputStream().write(qrCode);
+            response.getOutputStream().flush();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Generate QR Code with custom size
+     */
+    @GetMapping("/admin/attendance/qr/{code}/size/{size}")
+    public void getAttendanceQRCodeWithSize(@PathVariable String code,
+                                           @PathVariable int size,
+                                           HttpServletResponse response,
+                                           Authentication auth) {
+        if (auth == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+        
+        User user = userRepo.findByUsername(auth.getName()).orElse(null);
+        if (user == null || user.getRole() != User.Role.TEACHER) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+        
+        try {
+            Attendance session = attendanceRepo.findBySessionCodeAndUserIsNull(code).orElse(null);
+            if (session == null) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+            
+            String attendanceUrl = "http://localhost:8080/attendance/mark?code=" + code;
+            byte[] qrCode = qrCodeService.generateQRCodeImage(attendanceUrl, size);
+            
+            response.setContentType("image/png");
+            response.setContentLength(qrCode.length);
+            response.getOutputStream().write(qrCode);
+            response.getOutputStream().flush();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    // ==================== STUDENT ATTENDANCE ====================
     
     @GetMapping("/attendance")
     public String studentAttendance(Model model, Authentication auth, HttpServletRequest request) {
